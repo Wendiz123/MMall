@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from datetime import datetime
 
 # Create your models here.
 from django.utils.text import slugify
@@ -19,7 +20,7 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand)
     category = models.ForeignKey('Category')
     created_by = models.ForeignKey(User)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self,*args,**kwargs):
@@ -40,7 +41,21 @@ class Category(models.Model):
         return self.name
 
 class Cart(models.Model):
-    pass
+    date_transaction = models.DateTimeField(default=datetime.now, blank=True)
+    status = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    member = models.ForeignKey(User, default=0)
 
-class CarItem(models.Model):
-    pass
+    def __str__(self):
+        return "%s = %s product " % (self.date_transaction,self.cartitem_set.all())
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart)
+    product = models.ForeignKey(Product)
+    qty = models.IntegerField(default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=0, default=0)
+
+    def __str__(self):
+        return "%s, qty = " % (self.product.title,self.qty)
